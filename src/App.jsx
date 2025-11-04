@@ -1,3 +1,4 @@
+// Import dependencies and components
 import React, { useEffect, useState } from 'react'
 import {
   fetchPosts,
@@ -10,18 +11,19 @@ import PostList from './components/PostList'
 import PostForm from './components/PostForm'
 
 export default function App() {
+  // App state variables
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [editing, setEditing] = useState(null) // post being edited
+  const [editing, setEditing] = useState(null) // current post being edited
 
+  // Load posts from backend
   const load = async () => {
     setLoading(true)
     setError(null)
     try {
       const data = await fetchPosts()
-      // ensure descending by createdAt
-      data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // sort newest first
       setPosts(data)
     } catch (err) {
       setError(err.message || 'Failed to load posts')
@@ -30,10 +32,12 @@ export default function App() {
     }
   }
 
+  // Load posts when app starts
   useEffect(() => {
     load()
   }, [])
 
+  // Create new post
   const handleCreate = async (payload) => {
     try {
       const saved = await createPost(payload)
@@ -43,6 +47,7 @@ export default function App() {
     }
   }
 
+  // Update existing post
   const handleUpdate = async (id, payload) => {
     try {
       const saved = await updatePost(id, payload)
@@ -53,6 +58,7 @@ export default function App() {
     }
   }
 
+  // Patch post (optional field updates)
   const handlePatch = async (id, partial) => {
     try {
       const saved = await patchPost(id, partial)
@@ -62,6 +68,7 @@ export default function App() {
     }
   }
 
+  // Delete a post
   const handleDelete = async (id) => {
     if (!confirm('Delete this post?')) return
     try {
@@ -72,13 +79,16 @@ export default function App() {
     }
   }
 
+  // Render app UI
   return (
     <div className="app">
+      {/* Header */}
       <header>
         <h1>Posts</h1>
       </header>
 
       <main>
+        {/* Post creation form */}
         <section className="create">
           <h2>Create a post</h2>
           <PostForm
@@ -93,6 +103,7 @@ export default function App() {
           />
         </section>
 
+        {/* Post list */}
         <section className="list">
           <h2>All posts</h2>
           {loading && <div className="muted">Loading...</div>}
@@ -105,6 +116,7 @@ export default function App() {
             onDelete={handleDelete}
           />
 
+          {/* Edit post modal */}
           {editing && (
             <div className="modal">
               <div className="modal-content">
@@ -126,6 +138,7 @@ export default function App() {
         </section>
       </main>
 
+      {/* Footer */}
       <footer>
         <small>UI built with Vite + React — talks to /api/posts</small>
       </footer>
