@@ -137,11 +137,6 @@ export default function App() {
           )}
         </section>
       </main>
-
-      {/* Footer */}
-      <footer>
-        <small>UI built with Vite + React — talks to /api/posts</small>
-      </footer>
     </div>
   )
 }

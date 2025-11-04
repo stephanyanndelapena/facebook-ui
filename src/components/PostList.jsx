@@ -3,23 +3,26 @@ import PostItem from './PostItem'
 
 // Renders a list of PostItem components
 export default function PostList({ posts, onEdit, onPatch, onDelete }) {
-  // Show message if there are no posts
-  if (!posts || posts.length === 0) {
+  const items = posts || []
+
+  if (items.length === 0) {
     return <div className="muted">No posts yet</div>
   }
 
-  // Map through posts and render each PostItem
-  return (
-    <div className="post-list">
-      {posts.map(post => (
-        <PostItem
-          key={post.id}
-          post={post}
-          onEdit={() => onEdit?.(post)}
-          onPatch={(partial) => onPatch?.(post.id, partial)}
-          onDelete={() => onDelete?.(post.id)}
-        />
-      ))}
-    </div>
-  )
+  const renderItem = (item) => {
+    const handleEdit = () => onEdit?.(item)
+    const handlePatch = (partial) => onPatch?.(item.id, partial)
+    const handleDelete = () => onDelete?.(item.id)
+
+    return (
+      <PostItem
+        key={item.id}
+        post={item}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
+    )
+  }
+
+  return <div className="post-list">{items.map(renderItem)}</div>
 }

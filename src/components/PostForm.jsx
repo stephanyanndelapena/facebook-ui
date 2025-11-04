@@ -2,68 +2,88 @@ import React, { useEffect, useState } from 'react'
 
 // Form for creating or editing a post
 export default function PostForm({ initial = null, onSubmit, onCancel }) {
-    const [author, setAuthor] = useState(initial?.author || '')
-    const [content, setContent] = useState(initial?.content || '')
-    const [imageUrl, setImageUrl] = useState(initial?.imageUrl || '')
-    const [submitting, setSubmitting] = useState(false)
+    // clearer internal state names
+    const [name, setName] = useState(initial?.author || '')
+    const [body, setBody] = useState(initial?.content || '')
+    const [image, setImage] = useState(initial?.imageUrl || '')
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
-    // Reset form when editing a new post
+    // When the selected "initial" post changes, populate the form
     useEffect(() => {
-        setAuthor(initial?.author || '')
-        setContent(initial?.content || '')
-        setImageUrl(initial?.imageUrl || '')
+        setName(initial?.author || '')
+        setBody(initial?.content || '')
+        setImage(initial?.imageUrl || '')
     }, [initial?.id])
 
-    // Reset all fields
-    const reset = () => {
-        setAuthor('')
-        setContent('')
-        setImageUrl('')
+    // Clear all fields
+    const clearForm = () => {
+        setName('')
+        setBody('')
+        setImage('')
     }
 
-    // Handle form submit
-    const handleSubmit = async (e) => {
+    // Submit handler — keeps same behavior but clearer variable names
+    const handleFormSubmit = async (e) => {
         e.preventDefault()
-        if (!author.trim()) {
+
+        if (!name.trim()) {
             alert('Author is required')
             return
         }
-        const payload = { author: author.trim(), content: content.trim() || '', imageUrl: imageUrl.trim() || '' }
-        setSubmitting(true)
+
+        const payload = {
+            author: name.trim(),
+            content: body.trim() || '',
+            imageUrl: image.trim() || ''
+        }
+
+        setIsSubmitting(true)
         try {
-            await onSubmit(payload, reset)
+            // Pass the clearForm helper so caller can reset on success if desired
+            await onSubmit(payload, clearForm)
         } catch (err) {
-            alert('Failed to save: ' + (err.message || err))
+            alert('Failed to save: ' + (err?.message || String(err)))
         } finally {
-            setSubmitting(false)
+            setIsSubmitting(false)
         }
     }
 
     return (
-        <form className="post-form" onSubmit={handleSubmit}>
-            {/* Author input */}
+        <form className="post-form" onSubmit={handleFormSubmit}>
             <label>
                 Author
-                <input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="Your name" />
+                <input
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Your name"
+                    aria-label="Author"
+                />
             </label>
 
-            {/* Content textarea */}
             <label>
                 Content
-                <textarea value={content} onChange={(e) => setContent(e.target.value)} placeholder="What's on your mind?" />
+                <textarea
+                    value={body}
+                    onChange={(e) => setBody(e.target.value)}
+                    placeholder="What's on your mind?"
+                    aria-label="Content"
+                />
             </label>
 
-            {/* Optional image URL */}
             <label>
                 Image URL (optional)
-                <input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://..." />
+                <input
+                    value={image}
+                    onChange={(e) => setImage(e.target.value)}
+                    placeholder="https://..."
+                    aria-label="Image URL"
+                />
             </label>
 
-            {/* Buttons */}
             <div className="form-actions">
                 <button
                     type="submit"
-                    disabled={submitting}
+                    disabled={isSubmitting}
                     style={{
                         backgroundColor: '#1877f2',
                         color: 'white',
@@ -74,10 +94,10 @@ export default function PostForm({ initial = null, onSubmit, onCancel }) {
                         cursor: 'pointer',
                         transition: 'background 0.2s ease'
                     }}
-                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#166fe0'}
-                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#1877f2'}
+                    onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#166fe0')}
+                    onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#1877f2')}
                 >
-                    {submitting ? 'Saving...' : 'Create Post'}
+                    {isSubmitting ? 'Saving...' : 'Create Post'}
                 </button>
 
                 {onCancel && (

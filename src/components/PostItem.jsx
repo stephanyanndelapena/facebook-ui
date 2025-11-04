@@ -1,50 +1,49 @@
 import React, { useState } from 'react'
 
 // Displays a single post with author, content, image, and edit/delete buttons
-export default function PostItem({ post, onEdit, onDelete }) {
-    const [expanded, setExpanded] = useState(false) // toggle long text
+export default function PostItem({ post, onEdit = () => {}, onDelete = () => {} }) {
+    const [isExpanded, setIsExpanded] = useState(false)
 
-    // Format date safely
-    const formatDate = (dateStr) => {
+    // Convert an ISO/serial date string into a readable label
+    const formatDateString = (dateStr) => {
         if (!dateStr) return 'N/A'
-        const date = new Date(dateStr)
-        return isNaN(date.getTime()) ? 'Invalid Date' : date.toLocaleString()
+        const d = new Date(dateStr)
+        return Number.isNaN(d.getTime()) ? 'Invalid Date' : d.toLocaleString()
     }
+
+    const previewText = post.content ? post.content.slice(0, 300) : ''
+    const isLong = Boolean(post.content && post.content.length > 300)
 
     return (
         <article className="post">
-            {/* Post header */}
             <div className="post-header">
                 <strong>{post.author || 'Unknown'}</strong>
-                <time title={post.createdDate}>{formatDate(post.createdDate)}</time>
+                <time title={post.createdDate}>{formatDateString(post.createdDate)}</time>
             </div>
 
-            {/* Post image */}
             {post.imageUrl && (
                 <div className="post-image">
                     <img
                         src={post.imageUrl}
                         alt="post"
-                        onError={(e) => (e.target.style.display = 'none')}
+                        onError={(e) => { e.currentTarget.style.display = 'none' }}
                     />
                 </div>
             )}
 
-            {/* Post content */}
             <div className="post-content">
-                <p>{expanded ? post.content : (post.content?.slice(0, 300) || '')}</p>
-                {post.content && post.content.length > 300 && (
-                    <button className="link-btn" onClick={() => setExpanded(!expanded)}>
-                        {expanded ? 'Show less' : 'Read more'}
+                <p>{isExpanded ? post.content : previewText}</p>
+                {isLong && (
+                    <button className="link-btn" onClick={() => setIsExpanded(prev => !prev)}>
+                        {isExpanded ? 'Show less' : 'Read more'}
                     </button>
                 )}
             </div>
 
-            {/* Post actions */}
             <div className="post-actions">
                 <button onClick={onEdit}>Edit</button>
                 <button onClick={onDelete} className="danger">Delete</button>
-                <div className="muted">Modified: {formatDate(post.modifiedDate)}</div>
+                <div className="muted">Modified: {formatDateString(post.modifiedDate)}</div>
             </div>
         </article>
     )

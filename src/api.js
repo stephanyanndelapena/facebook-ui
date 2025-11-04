@@ -1,64 +1,65 @@
-// Base API endpoint
-const API_BASE = 'https://facebook-api-rkip.onrender.com/api/posts'
+// Base URL for posts API
+const BASE_URL = 'https://facebook-api-rkip.onrender.com/api/posts'
 
-// Handle API responses safely
-async function handleResponse(res) {
-  const contentType = res.headers.get('content-type') || ''
-  const data = contentType.includes('application/json') ? await res.json() : null
+// Parse response and normalize errors. Returns parsed JSON when available, otherwise null.
+async function parseResponse(response) {
+  const ct = response.headers.get('content-type') || ''
+  const body = ct.includes('application/json') ? await response.json() : null
 
-  if (!res.ok) {
-    const err = new Error((data && (data.message || data.error)) || res.statusText || 'API error')
-    err.status = res.status
-    err.data = data
-    throw err
+  if (!response.ok) {
+    const error = new Error((body && (body.message || body.error)) || response.statusText || 'API error')
+    error.status = response.status
+    error.body = body
+    throw error
   }
-  return data
+
+  return body
 }
 
-// Get all posts
+// Public API: fetch all posts
 export const fetchPosts = async () => {
-  const res = await fetch(API_BASE)
-  return handleResponse(res)
+  const res = await fetch(BASE_URL)
+  return parseResponse(res)
 }
 
-// Get single post by ID
+// Public API: fetch a single post by id
 export const fetchPost = async (id) => {
-  const res = await fetch(`${API_BASE}/${id}`)
-  return handleResponse(res)
+  const res = await fetch(`${BASE_URL}/${id}`)
+  return parseResponse(res)
 }
 
-// Create new post
-export const createPost = async (post) => {
-  const res = await fetch(API_BASE, {
+// Public API: create a new post (expects an object payload)
+export const createPost = async (payload) => {
+  const res = await fetch(BASE_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(post)
+    body: JSON.stringify(payload)
   })
-  return handleResponse(res)
+  return parseResponse(res)
 }
 
-// Update existing post (PUT)
-export const updatePost = async (id, post) => {
-  const res = await fetch(`${API_BASE}/${id}`, {
+// Public API: replace an existing post (PUT)
+export const updatePost = async (id, payload) => {
+  const res = await fetch(`${BASE_URL}/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(post)
+    body: JSON.stringify(payload)
   })
-  return handleResponse(res)
+  return parseResponse(res)
 }
 
-// Partially update post (PATCH)
+// Public API: partially update a post (PATCH)
 export const patchPost = async (id, partial) => {
-  const res = await fetch(`${API_BASE}/${id}`, {
+  const res = await fetch(`${BASE_URL}/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(partial)
   })
-  return handleResponse(res)
+  return parseResponse(res)
 }
 
-// Delete post by ID
+// Public API: delete a post by id
 export const deletePost = async (id) => {
-  const res = await fetch(`${API_BASE}/${id}`, { method: 'DELETE' })
-  return handleResponse(res)
+  const res = await fetch(`${BASE_URL}/${id}`, { method: 'DELETE' })
+  return parseResponse(res)
 }
